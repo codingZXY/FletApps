@@ -66,7 +66,7 @@ class Translator(ft.UserControl):
                         ft.IconButton(
                             icon=ft.icons.STAR_PURPLE500_SHARP,
                             tooltip="View Project on GitHub",
-                            on_click=lambda _: self.page.launch_url("https://github.com/thearyadev/MSRF")
+                            on_click=lambda _: self.page.launch_url("https://github.com/codingZXY/FletApps/tree/main/Translator")
                         ),
                         ft.Text("LuckOverflow", color=ft.colors.BLUE_GREY, italic=True),
                     ]
