@@ -53,7 +53,7 @@ def get_sign(keyword, salt):
     result = get_md5(source_str)
     return result
 
-def get_param_data(keyword):
+def get_param_data(keyword, source, target):
     '''
     构造请求参数
     :param keyword: 关键词
@@ -64,8 +64,8 @@ def get_param_data(keyword):
     sign = get_sign(keyword, salt)
     data = {
         'i': keyword,
-        'from': 'AUTO',
-        'to': 'ko',
+        'from': source,
+        'to': target,
         'smartresult': 'dict',
         'client': 'fanyideskweb',
         'salt': salt,
@@ -80,20 +80,20 @@ def get_param_data(keyword):
 
     return urlencode(data)
 
-def translate(keyword):
+def translate(keyword, source='auto', target='en'):
     '''
     请求翻译接口, 获取翻译结果
     :param keyword: 关键词
     :return:
     '''
-    param_data = get_param_data(keyword)
+    param_data = get_param_data(keyword, source, target)
     try:
         resp = requests.post(url, headers=headers, data=param_data, verify=False)
         data = json.loads(resp.text).get('translateResult')[0][0]
         result = data.get('tgt')
         return result
     except:
-        return '无结果'
+        return 'No result.'
 
 
 if __name__ == '__main__':

@@ -1,16 +1,26 @@
 import flet as ft
 from utils import LANGUAGES
+from youdao_api import translate
 
 class Translator(ft.UserControl):
     def build(self):
         self.lan_options = [ft.dropdown.Option(key=lan['code'], text=lan['label']) for lan in LANGUAGES]
-        dd_source_lan = ft.Dropdown(options=self.lan_options, value="auto", width=180)
-        dd_target_lan = ft.Dropdown(options=self.lan_options[1:], value="en", width=180)
+        self.dd_source_lan = ft.Dropdown(options=self.lan_options, value="auto", width=180, on_change=self.language_changed)
+        self.dd_target_lan = ft.Dropdown(options=self.lan_options[1:], value="en", width=180, on_change=self.language_changed)
+        self.tf_input = ft.TextField(
+            border=ft.InputBorder.NONE,
+            text_size=20,
+            multiline=True,
+            autofocus=True,
+            hint_text="Enter Text",
+            on_change=self.input_changed
+        )
+        self.tf_output = ft.TextField(border=ft.InputBorder.NONE, text_size=20, multiline=True, hint_text="Translation", read_only=True)
 
         tf_input = ft.Container(
             width=500,
             height=400,
-            content=ft.TextField(border=ft.InputBorder.NONE, text_size=20, multiline=True, autofocus=True, hint_text="Enter Text"),
+            content=self.tf_input,
             border_radius=ft.border_radius.all(5),
             border=ft.border.all(1, color=ft.colors.BLACK),
             padding=20,
@@ -19,23 +29,22 @@ class Translator(ft.UserControl):
         tf_output = ft.Container(
             width=500,
             height=400,
-            content=ft.TextField(border=ft.InputBorder.NONE, text_size=20, multiline=True, hint_text="Translation"),
+            content=self.tf_output,
             border_radius=ft.border_radius.all(5),
             border=ft.border.all(1, color=ft.colors.BLACK),
-            bgcolor=ft.colors.BLUE_GREY_50,
             padding=20,
-            expand=True,
-            disabled=True
+            expand=True
         )
 
         lan_choice = ft.Container(
             content=ft.Row(
                 [
-                    dd_source_lan,
+                    self.dd_source_lan,
                     ft.IconButton(
-                        icon=ft.icons.SWAP_HORIZ_SHARP
+                        icon=ft.icons.SWAP_HORIZ_SHARP,
+                        on_click=self.language_swapped
                     ),
-                    dd_target_lan
+                    self.dd_target_lan
                 ]
             ),
             expand=True
@@ -95,7 +104,32 @@ class Translator(ft.UserControl):
             self.page.theme_mode = ft.ThemeMode.LIGHT
             self.page.update()
 
+    def input_changed(self, e):
+        self.update_translation()
 
+    def language_changed(self, e):
+        self.update_translation()
+
+    def language_swapped(self, e):
+        if self.dd_source_lan.value == "auto":
+            self.dd_source_lan.value = self.dd_target_lan.value
+            self.dd_target_lan.value = 'en'
+        else:
+            self.dd_source_lan.value, self.dd_target_lan.value = self.dd_target_lan.value, self.dd_source_lan.value
+
+        self.update_translation()
+
+    def update_translation(self):
+        keyword = self.tf_input.value
+        if keyword:
+            source = self.dd_source_lan.value
+            target = self.dd_target_lan.value
+            translation = translate(keyword, source, target)
+            self.tf_output.value = translation
+        else:
+            self.tf_output.value = ""
+
+        self.update()
 
 
 def main(page:ft.Page):
